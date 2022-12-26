@@ -66,6 +66,7 @@ public class WebSecurityConfig {
                 .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority("ADMIN","USER")
                 .requestMatchers(HttpMethod.POST,"/api/signup").hasAnyAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE,"/api/remove/{id}").hasAnyAuthority("ADMIN")
+                .requestMatchers("/api/**").hasAnyAuthority("ADMIN","USER")
                 .anyRequest().authenticated()
                 .and()
                 .exceptionHandling().accessDeniedPage("/404")
