@@ -1,6 +1,7 @@
 package com.example.demo_jwt.service;
 
 
+import com.example.demo_jwt.enitity.Privilege;
 import com.example.demo_jwt.enitity.Role;
 import com.example.demo_jwt.enitity.User;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,13 +21,30 @@ public class UserDetailImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        Collection<Role> roles=user.getRoles();
-        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        for(Role role: roles) {
-            authorities.add(new SimpleGrantedAuthority(role.getName().name()));
+        Collection<Role> roles = user.getRoles();
+        return getGrantedAuthorities(getPrivileges(roles));
+    }
+    private List<String> getPrivileges(Collection<Role> roles) {
+
+        List<String> privileges = new ArrayList<>();
+        List<Privilege> collection = new ArrayList<>();
+        for (Role role : roles) {
+            privileges.add(role.getName().name());
+            collection.addAll(role.getPrivileges());
+        }
+        for (Privilege item : collection) {
+            privileges.add(item.getName());
+        }
+        return privileges;
+    }
+    private List<GrantedAuthority> getGrantedAuthorities(List<String> privileges) {
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (String privilege : privileges) {
+            authorities.add(new SimpleGrantedAuthority(privilege));
         }
         return authorities;
     }
+
 
     @Override
     public String getPassword() {

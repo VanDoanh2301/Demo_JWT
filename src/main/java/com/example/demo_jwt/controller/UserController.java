@@ -13,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,6 +42,7 @@ public class UserController {
     private UserRepostory userRepo;
 
     @PostMapping("/signin")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> login(@RequestBody AuthorRequest authorRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authorRequest.getUsername(),
@@ -51,7 +54,9 @@ public class UserController {
         List<String> roles=userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList());
         return  ResponseEntity.ok(new AuthorResponse(token,userDetails.getUsername(),roles));
     }
+
     @PostMapping("/signup")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<?> register(@RequestBody UserDto userDto) {
         if(userRepo.existsByUserName(userDto.getUsername())) {
             return ResponseEntity.badRequest().body("Username is adready taken!");
@@ -63,7 +68,9 @@ public class UserController {
         return ResponseEntity.ok("User register successfully!");
 
     }
+
     @GetMapping("/users")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('USER')")
     public ResponseEntity<?> getAllUser() {
         return ResponseEntity.ok(userService.getAllUser());
     }

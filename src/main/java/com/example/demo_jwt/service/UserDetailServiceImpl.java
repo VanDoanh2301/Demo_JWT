@@ -22,7 +22,6 @@ private UserRepostory repo;
         }
 
         //Logic to get the user form the Database
-
         return new UserDetailImpl(user);
     }
 }

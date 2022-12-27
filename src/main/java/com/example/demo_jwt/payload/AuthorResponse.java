@@ -22,4 +22,5 @@ public class AuthorResponse {
         this.username = username;
         this.roles = roles;
     }
+
 }

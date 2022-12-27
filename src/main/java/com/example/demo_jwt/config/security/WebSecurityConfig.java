@@ -1,5 +1,6 @@
 package com.example.demo_jwt.config.security;
 
+import com.example.demo_jwt.config.jwt.AccessDeniedExceptionHandler;
 import com.example.demo_jwt.config.jwt.JwtEntryPoint;
 import com.example.demo_jwt.config.jwt.JwtTokenFilter;
 import com.example.demo_jwt.service.UserDetailServiceImpl;
@@ -7,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -20,11 +24,16 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @EnableWebSecurity
 @Configuration
-
+@EnableGlobalMethodSecurity(
+        prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true)
 public class WebSecurityConfig {
 
     @Autowired
@@ -54,18 +63,31 @@ public class WebSecurityConfig {
         return authProvider;
     }
     @Bean
+    public DefaultWebSecurityExpressionHandler webSecurityExpressionHandler() {
+        DefaultWebSecurityExpressionHandler expressionHandler = new DefaultWebSecurityExpressionHandler();
+        expressionHandler.setRoleHierarchy(roleHierarchy());
+        return expressionHandler;
+    }
+    @Bean
+    public RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        String hierarchy = "ADMIN > USER";
+        roleHierarchy.setHierarchy(hierarchy);
+        return roleHierarchy;
+    }
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws  Exception {
         http.cors().and().csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                   .authorizeRequests().requestMatchers("/login").permitAll()
-                  .requestMatchers("/api/auth/all").permitAll()
-                  .requestMatchers("/api/auth/users").hasAnyAuthority("ADMIN","USER")
-                  .requestMatchers("/api/auth/admin").hasAuthority("ADMIN")
-
-
-                .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority("ADMIN","USER")
-                .requestMatchers(HttpMethod.POST,"/api/signup").hasAnyAuthority("ADMIN")
-                .requestMatchers(HttpMethod.DELETE,"/api/remove/{id}").hasAnyAuthority("ADMIN")
+//                  .requestMatchers("/api/auth/all").permitAll()
+//                  .requestMatchers("/api/auth/users").hasAnyAuthority("ADMIN","USER")
+//                  .requestMatchers("/api/auth/admin").hasAuthority("ADMIN")
+//
+//
+//                .requestMatchers(HttpMethod.GET,"/api/users").hasAnyAuthority("ADMIN","USER")
+//                .requestMatchers(HttpMethod.POST,"/api/signup").hasAnyAuthority("ADMIN")
+//                .requestMatchers(HttpMethod.DELETE,"/api/remove/{id}").hasAnyAuthority("ADMIN")
                 .requestMatchers("/api/**").hasAnyAuthority("ADMIN","USER")
                 .anyRequest().authenticated()
                 .and()
@@ -79,6 +101,9 @@ public class WebSecurityConfig {
 
         ;
         http.exceptionHandling().authenticationEntryPoint(jwtEntryPoint);
+        http.exceptionHandling().accessDeniedHandler(new AccessDeniedExceptionHandler());
+        http.exceptionHandling()
+                .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class);
 

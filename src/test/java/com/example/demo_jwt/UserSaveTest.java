@@ -34,10 +34,10 @@ public class UserSaveTest {
     @Test
     public void saveUserTest() {
         UserDto userDto = UserDto.builder()
-                .username("admin")
+                .username("Son")
                 .password("123")
-                .email("admin2@gmail.com")
-                .role(Arrays.asList("admin"))
+                .email("Son@gmail.com")
+                .role(Arrays.asList("user"))
                 .build();
         Collection<String> strRoles = userDto.getRole();
 
