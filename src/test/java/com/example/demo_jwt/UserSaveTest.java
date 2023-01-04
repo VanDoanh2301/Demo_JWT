@@ -52,4 +52,15 @@ public class UserSaveTest {
         List<User> users = userRepo.findAll();
         System.out.println(users);
     }
+
+    @Test
+    public void updateUser() {
+       User user =  userRepo.getUserByName("Tran");
+      Collection<Role> roles = user.getRoles();
+      roles.forEach(role -> {
+          roleRepo.delete(role);
+      });
+      user.setRoles(Arrays.asList(new Role("ADMIN")));
+       //userRepo.save(user);
+    }
 }

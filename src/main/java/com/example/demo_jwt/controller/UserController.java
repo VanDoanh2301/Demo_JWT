@@ -2,6 +2,7 @@ package com.example.demo_jwt.controller;
 
 import com.example.demo_jwt.Dto.UserDto;
 import com.example.demo_jwt.config.jwt.JwtProvider;
+import com.example.demo_jwt.enitity.Role;
 import com.example.demo_jwt.enitity.User;
 import com.example.demo_jwt.payload.AuthorRequest;
 import com.example.demo_jwt.payload.AuthorResponse;
@@ -23,6 +24,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,15 +59,16 @@ public class UserController {
 
     @PostMapping("/signup")
     @PreAuthorize("hasAuthority('USER_READ')")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto,@RequestParam("token") String token) {
+    public ResponseEntity<?> register(@RequestBody UserDto userDto) {
         if(userRepo.existsByUserName(userDto.getUsername())) {
             return ResponseEntity.badRequest().body("Username is adready taken!");
         }
         if(userRepo.existsByEmail(userDto.getEmail())) {
             return ResponseEntity.badRequest().body("Email is adready taken!");
         }
-       User user =  userService.saveUser(userDto);
-        return ResponseEntity.ok("User register successfully!");
+        User user =  userService.saveUser(userDto);
+        Collection<Role> roles = user.getRoles();
+        return ResponseEntity.ok(user);
 
     }
 
@@ -79,14 +82,7 @@ public class UserController {
                         userDetails.getUserName(),
                         userDetails.getPassWord());
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         return ResponseEntity.ok(userService.getAllUser());
-    }
-    @DeleteMapping("/remove/{id}")
-    public ResponseEntity<?> removeUser(@PathVariable("id") Integer id) {
-        userService.deleteUser(id);
-        List<User> users = userService.getAllUser();
-        return  ResponseEntity.ok(users);
     }
     @GetMapping("/jwt")
     @PreAuthorize("hasAuthority('USER_READ')")

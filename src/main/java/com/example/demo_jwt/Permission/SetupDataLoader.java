@@ -36,9 +36,9 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
         Privilege readUser
                 = createPrivilegeIfNotFound("USER_READ");
         Privilege signin
-                = createPrivilegeIfNotFound("USER_SINGIN");
+                = createPrivilegeIfNotFound("USER_SIGNIN");
         Privilege signup
-                = createPrivilegeIfNotFound("USER_SINGUP");
+                = createPrivilegeIfNotFound("USER_SIGNUP");
 
 //        User user =User.builder()
 //                .userName("Admin")

@@ -40,14 +40,25 @@ public class UserRoleController {
     }
     @GetMapping("/users")
     @PreAuthorize("hasAuthority('USER_READ')")
-    @Secured("SIGNIN")
     public String userRole() {
-        return "user success";
+        return "USER success";
     }
     @GetMapping("/admin")
-  @PreAuthorize("hasAuthority('ADMIN_ALL')")
+    @PreAuthorize("hasAuthority('ADMIN_ALL')")
     public String adminRole() {
-        return "admin success";
+        return "ADMIN success";
+    }
+
+    @GetMapping("/signin")
+    @PreAuthorize("hasAuthority('USER_SIGNIN')")
+    public String singin() {
+        return "Singin success";
+    }
+
+    @GetMapping("/signup")
+    @PreAuthorize("hasAuthority('USER_SIGNUP')")
+    public String signup() {
+        return "Signup success";
     }
     @PostMapping("/roles")
     @PreAuthorize("hasAuthority('USER_READ')")
@@ -70,7 +81,4 @@ public class UserRoleController {
         Collection<Role> roles = user.getRoles();
         return  ResponseEntity.ok(user);
     }
-
-
-
 }
