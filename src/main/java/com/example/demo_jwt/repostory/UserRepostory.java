@@ -10,6 +10,8 @@ import org.springframework.stereotype.Repository;
 public interface UserRepostory extends JpaRepository<User,Integer> {
     @Query("SELECT u FROM User u where u.userName=?1")
     User getUserByName(String username);
+
+    User getUserById(Integer id);
     boolean existsByUserName(String username);
     boolean existsByEmail(String email);
     User deleteById(int id);

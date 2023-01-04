@@ -45,7 +45,7 @@ public class UserSaveTest {
     }
     @Test
     public void deleteUser() {
-        userRepo.deleteById(5);
+        userRepo.deleteById(2);
     }
     @Test
     public void getAllUser() {
@@ -55,12 +55,16 @@ public class UserSaveTest {
 
     @Test
     public void updateUser() {
-       User user =  userRepo.getUserByName("Tran");
-      Collection<Role> roles = user.getRoles();
-      roles.forEach(role -> {
-          roleRepo.delete(role);
-      });
-      user.setRoles(Arrays.asList(new Role("ADMIN")));
-       //userRepo.save(user);
+       Role role = roleRepo.findByName("ADMIN");
+       Collection<Role>roles = new ArrayList<>();
+       roles.add(role);
+        userRepo
+                .findById(2) // returns Optional<User>
+                .ifPresent(user1 -> {
+                    user1.setUserName("Son");
+                    user1.setPassWord(encoder().encode("123"));
+                    user1.setRoles(roles);
+                    userRepo.save(user1);
+                });
     }
 }

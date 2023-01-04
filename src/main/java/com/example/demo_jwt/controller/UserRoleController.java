@@ -18,9 +18,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 
 @RestController
@@ -34,6 +37,10 @@ public class UserRoleController {
     private RoleRepostory roleRepo;
     @Autowired
     private UserService userService;
+
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder();
+    }
     @GetMapping("/all")
     public String allRole() {
         return "all success";
@@ -70,7 +77,6 @@ public class UserRoleController {
             Collection<Privilege> privileges =  role.getPrivileges();
             privileges.add(privilege);
             roleRepo.save(role);
-
         });
         return  ResponseEntity.ok(user);
     }
@@ -81,4 +87,22 @@ public class UserRoleController {
         Collection<Role> roles = user.getRoles();
         return  ResponseEntity.ok(user);
     }
+    @PutMapping("/update")
+    @PreAuthorize("hasAuthority('USER_READ')")
+    public ResponseEntity<?> updateUser(@RequestBody UserDto userDto) {
+        Role role = roleRepo.findByName("ADMIN");
+        Collection<Role>roles = new ArrayList<>();
+        roles.add(role);
+        userRepo
+                .findById(userDto.getId()) // returns Optional<User>
+                .ifPresent(user1 -> {
+                    user1.setUserName(userDto.getUsername());
+                    user1.setPassWord(encoder().encode(userDto.getPassword()));
+                    user1.setEmail(userDto.getEmail());
+                    user1.setRoles(roles);
+                    userRepo.save(user1);
+                });
+        return  ResponseEntity.ok("update access");
+    }
+
 }

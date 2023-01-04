@@ -90,4 +90,10 @@ public class UserController {
         String u = jwtProvider.getUserNameFromJwtToken(token);
               return u;
     }
+    @DeleteMapping("/remove_users/{id}")
+    @PreAuthorize("hasAuthority('ADMIN_ALL')")
+    public ResponseEntity<?> removeUser(@PathVariable("id") Integer id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok("Delete access");
+    }
 }
