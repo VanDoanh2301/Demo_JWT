@@ -14,10 +14,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Component
 public class SetupDataLoader implements ApplicationListener<ContextRefreshedEvent> {
@@ -34,12 +31,29 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        Privilege removeUser
-                = createPrivilegeIfNotFound("REMOVE");
+        Privilege admin
+                = createPrivilegeIfNotFound("ADMIN_ALL");
         Privilege readUser
-                = createPrivilegeIfNotFound("READ");
+                = createPrivilegeIfNotFound("USER_READ");
         Privilege signin
-                = createPrivilegeIfNotFound("SIGNIN");
+                = createPrivilegeIfNotFound("USER_SINGIN");
+        Privilege signup
+                = createPrivilegeIfNotFound("USER_SINGUP");
+
+//        User user =User.builder()
+//                .userName("Admin")
+//                .passWord(encoder().encode("123"))
+//                .email("admin@gmail.com")
+//                .roles(Arrays.asList(new Role("ADMIN")))
+//                .build();
+//        userRepo.save(user);
+//
+//        Collection<Role> roles = user.getRoles();
+//        Collection<Privilege> privileges = Arrays.asList(admin,readUser,signin,signup);
+//        roles.forEach(role -> {
+//            role.setPrivileges(privileges);
+//            roleRepo.save(role);
+//        });
 
 //        List<Privilege> adminPrivileges = Arrays.asList(
 //               removeUser, readUser,signin);

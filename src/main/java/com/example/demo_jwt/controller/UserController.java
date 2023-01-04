@@ -42,7 +42,7 @@ public class UserController {
 
 
     @PostMapping("/signin")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> login(@RequestBody AuthorRequest authorRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authorRequest.getUsername(),
@@ -56,7 +56,7 @@ public class UserController {
     }
 
     @PostMapping("/signup")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> register(@RequestBody UserDto userDto,@RequestParam("token") String token) {
         if(userRepo.existsByUserName(userDto.getUsername())) {
             return ResponseEntity.badRequest().body("Username is adready taken!");
@@ -70,7 +70,7 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> getAllUser(@RequestParam("token") String token) {
         String username = jwtProvider.getUserNameFromJwtToken(token);
         User userDetails = userRepo.getUserByName(username);
@@ -89,7 +89,7 @@ public class UserController {
         return  ResponseEntity.ok(users);
     }
     @GetMapping("/jwt")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public String getToken(@RequestParam("token") String token ) {
         String u = jwtProvider.getUserNameFromJwtToken(token);
               return u;

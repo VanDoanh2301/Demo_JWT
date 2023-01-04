@@ -14,11 +14,11 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  int id;
-    @Column(name="user_Name", length = 120, nullable = false)
+    @Column(name="user_Name", length = 120, nullable = false,unique = true)
     private  String userName;
     @Column(name="pass_Word", length = 120, nullable = false)
     private  String passWord;
-    @Column(name="Email", length = 120, nullable = false)
+    @Column(name="Email", length = 120, nullable = false,unique = true)
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)

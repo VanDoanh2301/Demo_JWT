@@ -39,18 +39,18 @@ public class UserRoleController {
         return "all success";
     }
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     @Secured("SIGNIN")
     public String userRole() {
         return "user success";
     }
     @GetMapping("/admin")
-  @PreAuthorize("hasAuthority('READ')")
+  @PreAuthorize("hasAuthority('ADMIN_ALL')")
     public String adminRole() {
         return "admin success";
     }
-    @PostMapping("/demo")
-    @PreAuthorize("hasAuthority('READ')")
+    @PostMapping("/roles")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> demo(@RequestBody UserDemo userDemo) {
         User user = userRepo.getUserByName(userDemo.getName());
         Collection<Role> roles = user.getRoles();
@@ -64,7 +64,7 @@ public class UserRoleController {
         return  ResponseEntity.ok(user);
     }
     @PostMapping("/add")
-    @PreAuthorize("hasAuthority('READ')")
+    @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> add(@RequestBody UserDto userDto) {
         User user  = userService.saveUser(userDto);
         Collection<Role> roles = user.getRoles();

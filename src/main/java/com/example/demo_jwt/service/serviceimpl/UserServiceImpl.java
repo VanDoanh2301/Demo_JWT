@@ -28,7 +28,7 @@ public class UserServiceImpl implements UserService{
     }
     @Override
     public User saveUser(UserDto userDto) {
-        Privilege privilege = privilegeRepo.findByName("READ");
+        Privilege privilege = privilegeRepo.findByName("USER_READ");
        User user =User.builder()
                .userName(userDto.getUsername())
                .passWord(encoder().encode(userDto.getPassword()))
