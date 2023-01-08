@@ -8,6 +8,10 @@ import com.example.demo_jwt.repostory.PrivilegeRepostory;
 import com.example.demo_jwt.repostory.RoleRepostory;
 import com.example.demo_jwt.repostory.UserRepostory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -29,18 +33,53 @@ public class UserServiceImpl implements UserService{
     @Override
     public User saveUser(UserDto userDto) {
         Privilege privilege = privilegeRepo.findByName("USER_READ");
+        Privilege privilege1 = privilegeRepo.findByName("USER_SIGNIN");
+        Collection<String> roleDto = userDto.getRole();
+        Collection<Role>  listRole = new ArrayList<>();
+        roleDto.forEach(ro -> {
+            switch (ro) {
+                case "user": {
+                    Role userRole = RoleRepo.findByName("USER");
+                    if (userRole == null) {
+                        userRole = new Role("USER");
+                        RoleRepo.save(userRole);
+                    }
+                    listRole.add(userRole);
+                    break;
+                }
+                case "manager" :{
+                    Role managerRole = RoleRepo.findByName("MANAGER");
+                    if (managerRole == null) {
+                        managerRole = new Role("MANAGER");
+                        RoleRepo.save(managerRole);
+                    }
+                    listRole.add(managerRole);
+                    break;
+                }
+                case "admin" :{
+                    Role managerRole = RoleRepo.findByName("ADMIN");
+                    if (managerRole == null) {
+                        managerRole = new Role("ADMIN");
+                        RoleRepo.save(managerRole);
+                    }
+                    listRole.add(managerRole);
+                    break;
+                }
+            }
+        });
+
        User user =User.builder()
                .userName(userDto.getUsername())
                .passWord(encoder().encode(userDto.getPassword()))
                .email(userDto.getEmail())
-               .roles(Arrays.asList(new Role("USER")))
+               .roles(listRole)
                .build();
        Collection<Role> roles = user.getRoles();
        Collection<Privilege> privileges = new ArrayList<>();
        privileges.add(privilege);
+       privileges.add(privilege1);
        roles.forEach(role -> {
            role.setPrivileges(privileges);
-
        });
 
         return UserRepo.save(user);
@@ -56,4 +95,12 @@ public class UserServiceImpl implements UserService{
     public void deleteUser(int id) {
         UserRepo.deleteById(id);
     }
+
+    @Override
+    public Page<User> getUser(Integer pageNo, Integer recordCount) {
+        Sort sort = Sort.by(Sort.Direction.ASC,"userName");
+        Pageable pageable = PageRequest.of(pageNo, recordCount,sort);
+        return UserRepo.findAll(pageable);
+    }
+
 }

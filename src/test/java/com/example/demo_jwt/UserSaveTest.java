@@ -2,8 +2,10 @@ package com.example.demo_jwt;
 
 import com.example.demo_jwt.Dto.UserDto;
 import com.example.demo_jwt.config.jwt.JwtProvider;
+import com.example.demo_jwt.enitity.Privilege;
 import com.example.demo_jwt.enitity.Role;
 import com.example.demo_jwt.enitity.User;
+import com.example.demo_jwt.repostory.PrivilegeRepostory;
 import com.example.demo_jwt.repostory.RoleRepostory;
 import com.example.demo_jwt.repostory.UserRepostory;
 import org.assertj.core.api.Assertions;
@@ -27,6 +29,9 @@ public class UserSaveTest {
     private UserRepostory userRepo;
     @Autowired
     private RoleRepostory roleRepo;
+
+    @Autowired
+    private PrivilegeRepostory privilegeRepo;
    public PasswordEncoder encoder(){
        return new BCryptPasswordEncoder();
     }
@@ -55,16 +60,17 @@ public class UserSaveTest {
 
     @Test
     public void updateUser() {
-       Role role = roleRepo.findByName("ADMIN");
-       Collection<Role>roles = new ArrayList<>();
-       roles.add(role);
-        userRepo
-                .findById(2) // returns Optional<User>
-                .ifPresent(user1 -> {
-                    user1.setUserName("Son");
-                    user1.setPassWord(encoder().encode("123"));
-                    user1.setRoles(roles);
-                    userRepo.save(user1);
-                });
+       List<Role> roles = roleRepo.findId(3);
+       Privilege p = privilegeRepo.findByName("USER_READ");
+       roles.forEach(role -> {
+           Collection<Privilege> privileges = role.getPrivileges();
+           privileges.forEach(privilege -> {
+               if(privilege.getName()== p.getName()){
+                   privileges.remove(privilege);
+               }
+
+           });  roleRepo.save(role);
+       });
+
     }
 }

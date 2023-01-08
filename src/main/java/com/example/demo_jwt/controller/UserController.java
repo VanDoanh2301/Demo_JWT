@@ -44,7 +44,7 @@ public class UserController {
 
 
     @PostMapping("/signin")
-    @PreAuthorize("hasAuthority('USER_READ')")
+    @PreAuthorize("hasAuthority('USER_SIGNIN')")
     public ResponseEntity<?> login(@RequestBody AuthorRequest authorRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(authorRequest.getUsername(),
@@ -91,7 +91,7 @@ public class UserController {
               return u;
     }
     @DeleteMapping("/remove_users/{id}")
-    @PreAuthorize("hasAuthority('ADMIN_ALL')")
+    @PreAuthorize("hasAuthority('REMOVE_USER')")
     public ResponseEntity<?> removeUser(@PathVariable("id") Integer id) {
         userService.deleteUser(id);
         return ResponseEntity.ok("Delete access");

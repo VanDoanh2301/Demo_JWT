@@ -12,8 +12,6 @@ public class Privilege {
     private Long id;
     @Column(name="name", length = 120, nullable = false)
     private String name;
-
-
     public Privilege() {
     }
 

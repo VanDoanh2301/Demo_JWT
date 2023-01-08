@@ -39,7 +39,8 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
                 = createPrivilegeIfNotFound("USER_SIGNIN");
         Privilege signup
                 = createPrivilegeIfNotFound("USER_SIGNUP");
-
+        Privilege remove
+                = createPrivilegeIfNotFound("REMOVE_USER");
 //        User user =User.builder()
 //                .userName("Admin")
 //                .passWord(encoder().encode("123"))
@@ -49,7 +50,7 @@ public class SetupDataLoader implements ApplicationListener<ContextRefreshedEven
 //        userRepo.save(user);
 //
 //        Collection<Role> roles = user.getRoles();
-//        Collection<Privilege> privileges = Arrays.asList(admin,readUser,signin,signup);
+//        Collection<Privilege> privileges = Arrays.asList(admin,readUser,signin,signup,remove);
 //        roles.forEach(role -> {
 //            role.setPrivileges(privileges);
 //            roleRepo.save(role);

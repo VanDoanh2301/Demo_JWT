@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -90,19 +92,88 @@ public class UserRoleController {
     @PutMapping("/update")
     @PreAuthorize("hasAuthority('USER_READ')")
     public ResponseEntity<?> updateUser(@RequestBody UserDto userDto) {
-        Role role = roleRepo.findByName("ADMIN");
-        Collection<Role>roles = new ArrayList<>();
-        roles.add(role);
-        userRepo
-                .findById(userDto.getId()) // returns Optional<User>
-                .ifPresent(user1 -> {
-                    user1.setUserName(userDto.getUsername());
-                    user1.setPassWord(encoder().encode(userDto.getPassword()));
-                    user1.setEmail(userDto.getEmail());
-                    user1.setRoles(roles);
-                    userRepo.save(user1);
+        Privilege privilege = privilegeRepo.findByName("USER_READ");
+        Collection<String> roleDto = userDto.getRole();
+        Collection<Role>  listRole = new ArrayList<>();
+        roleDto.forEach(ro -> {
+                            Role userRole = roleRepo.findByName(ro);
+                            if (userRole == null) {
+                                userRole = new Role(ro);
+                                roleRepo.save(userRole);
+                            }
+                            listRole.add(userRole);
                 });
-        return  ResponseEntity.ok("update access");
+//                userRepo.findById(userDto.getId()) .ifPresent(user1 -> {
+//                    user1.setUserName(userDto.getUsername());
+//                    user1.setPassWord(encoder().encode(userDto.getPassword()));
+//                    user1.setEmail(userDto.getEmail());
+//                    user1.setRoles(listRole);
+//                    userRepo.save(user1);
+//                });
+        User user = userRepo.getUserByName(userDto.getUsername());
+        if(user != null) {
+            user.setUserName(userDto.getUsername());
+                    user.setPassWord(encoder().encode(userDto.getPassword()));
+                    user.setEmail(userDto.getEmail());
+                    user.setRoles(listRole);
+                    userRepo.save(user);
+        }
+//        Collection<Role> roles = user.getRoles();
+//        Collection<Privilege> privileges = new ArrayList<>();
+//        privileges.add(privilege);
+//        roles.forEach(role -> {
+//            role.setPrivileges(privileges);
+//        });
+        return  ResponseEntity.ok(user);
+    }
+    @DeleteMapping("/delete")
+    public  ResponseEntity<?> deletePermission(@RequestBody UserDemo userDemo) {
+        User user = userRepo.getUserByName(userDemo.getName());
+        Collection<Role> roles = user.getRoles();
+        Collection<String> privileges = userDemo.getPrivileges();
+        Collection<Privilege> listPrivileges = new ArrayList<>();
+        privileges.forEach(privilege -> {
+            Privilege pri =privilegeRepo.findByName(privilege);
+            if(pri!=null) {
+                listPrivileges.add(pri);
+            }
+
+        });
+        roles.forEach(role -> {
+            role.setPrivileges(listPrivileges);
+            roleRepo.save(role);
+        });
+        return ResponseEntity.ok(user);
+    }
+
+    @DeleteMapping("Remove")
+    @PreAuthorize("hasAuthority('USER_READ')")
+    public ResponseEntity<?> removeRole(@RequestBody UserDemo userDemo) {
+        List<Role> roles = roleRepo.findId(userDemo.getId());
+        Privilege p = privilegeRepo.findByName(userDemo.getPrivilege());
+        roles.forEach(role -> {
+            Collection<Privilege> privileges = role.getPrivileges();
+//             privileges.forEach(privilege -> {
+//                if(privilege.getName()== p.getName()){
+//                    privileges.remove(privilege);
+//                }
+//            });
+            Iterator<Privilege> pri = privileges.iterator();
+            while(pri.hasNext()) {
+                Privilege pro =pri.next();
+                if(pro.getName() == p.getName()) {
+                    privileges.remove(pro);
+                }
+            }
+            roleRepo.save(role);
+        });
+        User user = userRepo.getUserById(userDemo.getId());
+        return ResponseEntity.ok(user);
+    }
+    @GetMapping("/getAll/{pageNo}/{recordCount}")
+    @PreAuthorize("hasAuthority('USER_READ')")
+    public  ResponseEntity<?> getUser(@PathVariable("pageNo") Integer pageNo,@PathVariable("recordCount") Integer recordCount) {
+            return ResponseEntity.ok(userService.getUser(pageNo,recordCount));
     }
 
 }

@@ -8,20 +8,22 @@ import lombok.NoArgsConstructor;
 
 import java.util.Collection;
 @Builder
+@Data
 public class UserDto {
     private int id;
     private String username;
     private  String password;
     private  String email;
-//    private Collection<Role> role;
+   private Collection<String> role;
     public UserDto() {
     }
 
-    public UserDto(int id, String username, String password, String email) {
+    public UserDto(int id, String username, String password, String email, Collection<String> role) {
         this.id = id;
         this.username = username;
         this.password = password;
         this.email = email;
+        this.role = role;
     }
 
     public int getId() {
@@ -56,5 +58,12 @@ public class UserDto {
         this.email = email;
     }
 
+    public Collection<String> getRole() {
+        return role;
+    }
+
+    public void setRole(Collection<String> role) {
+        this.role = role;
+    }
 }
 
