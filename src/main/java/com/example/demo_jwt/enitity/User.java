@@ -23,7 +23,7 @@ public class User {
 
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinTable(name = "user_roles",
-    joinColumns = @JoinColumn(name = "user_Id"),
+    joinColumns = @JoinColumn(name = "user_Id",nullable = true),
             inverseJoinColumns = @JoinColumn(name = "role_Id")
     )
     private Collection<Role> roles;

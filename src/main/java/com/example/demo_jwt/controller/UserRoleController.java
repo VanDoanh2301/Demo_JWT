@@ -11,6 +11,10 @@ import com.example.demo_jwt.repostory.UserRepostory;
 import com.example.demo_jwt.service.UserDetailImpl;
 import com.example.demo_jwt.service.serviceimpl.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
@@ -21,12 +25,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -153,11 +156,6 @@ public class UserRoleController {
         Privilege p = privilegeRepo.findByName(userDemo.getPrivilege());
         roles.forEach(role -> {
             Collection<Privilege> privileges = role.getPrivileges();
-//             privileges.forEach(privilege -> {
-//                if(privilege.getName()== p.getName()){
-//                    privileges.remove(privilege);
-//                }
-//            });
             Iterator<Privilege> pri = privileges.iterator();
             while(pri.hasNext()) {
                 Privilege pro =pri.next();
@@ -170,10 +168,59 @@ public class UserRoleController {
         User user = userRepo.getUserById(userDemo.getId());
         return ResponseEntity.ok(user);
     }
-    @GetMapping("/getAll/{pageNo}/{recordCount}")
+    @GetMapping("/search")
     @PreAuthorize("hasAuthority('USER_READ')")
-    public  ResponseEntity<?> getUser(@PathVariable("pageNo") Integer pageNo,@PathVariable("recordCount") Integer recordCount) {
-            return ResponseEntity.ok(userService.getUser(pageNo,recordCount));
+    public  ResponseEntity<?> getUser(@RequestParam(value = "name",required = false) String name
+            ,@RequestParam(value = "page") Optional<Integer> page
+            ,@RequestParam("size") Optional<Integer> size) {
+
+        int currentPage = page.orElse(1);
+        int pageSize = size.orElse(3);
+
+        Pageable pageable = PageRequest.of(currentPage-1,pageSize, Sort.by("userName"));
+        Page<User> resultPage= null;
+        if(StringUtils.hasText(name)) {
+            resultPage =userService.findByUserNameContaining(name,pageable);
+
+        } else {
+            resultPage = userRepo.findAll(pageable);
+        }
+            return ResponseEntity.ok(resultPage);
     }
+    @Transactional
+    @GetMapping("/deleteId")
+    @PreAuthorize("hasAuthority('USER_READ')")
+    public  ResponseEntity<?> deleteRole(@RequestParam(value = "roleId") Integer roleId,@RequestParam(value = "name") String name) {
+        roleRepo.deleteRoleId(roleId,name);
+        return ResponseEntity.ok("Delete access");
+    }
+
+    @GetMapping("/deleteByid")
+    @PreAuthorize("hasAuthority('USER_READ')")
+    public ResponseEntity<?> deleteRoleId(@RequestParam(value = "roleId") Integer roleId,@RequestParam(value = "name") String name) {
+        List<Role> roles = roleRepo.findId(roleId);
+        Privilege privilege = privilegeRepo.findByName(name);
+        if(roles == null) {
+            return  ResponseEntity.ok("Role null");
+        } else {
+            if(privilege == null) {
+                return ResponseEntity.ok("Privilege null");
+            } else {
+                roles.forEach(role -> {
+                    Collection<Privilege> privileges = role.getPrivileges();
+                    Iterator<Privilege> pri = privileges.iterator();
+                    while(pri.hasNext()) {
+                        Privilege pro =pri.next();
+                        if(pro.getName() == privilege.getName()) {
+                            privileges.remove(pro);
+                        }
+                    }
+                    roleRepo.save(role);
+                });
+                return ResponseEntity.ok("Delete success");
+            }
+        }
+    }
+
 
 }

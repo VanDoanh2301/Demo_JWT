@@ -9,9 +9,7 @@ import com.example.demo_jwt.repostory.RoleRepostory;
 import com.example.demo_jwt.repostory.UserRepostory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -97,10 +95,17 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public Page<User> getUser(Integer pageNo, Integer recordCount) {
-        Sort sort = Sort.by(Sort.Direction.ASC,"userName");
-        Pageable pageable = PageRequest.of(pageNo, recordCount,sort);
-        return UserRepo.findAll(pageable);
+    public Page<User> findByUserNameContaining(String name, Pageable pageable) {
+        return UserRepo.findByUserNameContaining(name, pageable);
     }
 
+    @Override
+    public void deleteRoleId(Integer id, String name) {
+        RoleRepo.deleteRoleId(id, name);
+    }
+
+    @Override
+    public User getUserByName(String username) {
+        return UserRepo.getUserByName(username);
+    }
 }

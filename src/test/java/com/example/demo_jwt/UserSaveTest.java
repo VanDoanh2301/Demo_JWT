@@ -73,4 +73,10 @@ public class UserSaveTest {
        });
 
     }
+    @Test
+public  void nativeQuery() {
+
+       roleRepo.deleteRoleId(4,"USER_SIGNIN");
+
+    }
 }
